@@ -28,7 +28,7 @@ func GetMenu(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Menu not found", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "menu": menu})
+	return c.JSON(fiber.Map{"message": "Successfully get menu", "menu": menu})
 }
 
 func CreateMenu(c *fiber.Ctx) error {
@@ -54,7 +54,7 @@ func CreateMenu(c *fiber.Ctx) error {
 
 	var category models.Category
 	if err := db.DB.First(&category, menu.CategoryID).Error; err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Category ID not valid", "error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": err.Error()})
 	}
 
 	menu.CategoryName = category.Name
