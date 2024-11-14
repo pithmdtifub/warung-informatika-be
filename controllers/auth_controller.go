@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
-	"os"
-	"time"
 	"warung-informatika-be/helpers"
 	"warung-informatika-be/models"
 	repo "warung-informatika-be/repositories"
@@ -41,21 +38,6 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	token, err := generateJWT(user.Username)
+	token, err := helpers.GenerateJWT(user.Username)
 	return c.JSON(fiber.Map{"message": "login success", "token": token})
-}
-
-func generateJWT(username string) (string, error) {
-	key := os.Getenv("JWT_SECRET")
-	var jwtKey = []byte(key)
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(15 * time.Minute).Unix(),
-	})
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
 }
