@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
@@ -17,10 +18,20 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 func CreateCategory(c *fiber.Ctx) error {
+	validate := validator.New()
+
 	category := new(models.Category)
 
 	if err := c.BodyParser(category); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err.Error()})
+	}
+
+	if err := validate.Struct(category); err != nil {
+		errors := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
 
 	if err := repositories.CreateCategory(category); err != nil {
