@@ -5,6 +5,16 @@ import (
 	"warung-informatika-be/models"
 )
 
+func GetUsers() ([]models.User, error) {
+	var users []models.User
+
+	if err := db.DB.Find(&users).Error; err != nil {
+		return []models.User{}, err
+	}
+
+	return users, nil
+}
+
 func GetUser(id int) (models.User, error) {
 	var user models.User
 
