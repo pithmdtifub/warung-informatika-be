@@ -36,9 +36,13 @@ func CreateMenu(c *fiber.Ctx) error {
 
 	var menu models.Menu
 
-	_ = c.BodyParser(&menu)
+	err := c.BodyParser(&menu)
 
-	if err := validate.Struct(menu); err != nil {
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
+	}
+
+	if err = validate.Struct(menu); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
