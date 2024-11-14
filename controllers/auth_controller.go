@@ -38,6 +38,6 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	token, err := helpers.GenerateJWT(user.Username, user.Role)
+	token, err := helpers.GenerateJWT(user.Username, userDB.Role)
 	return c.JSON(fiber.Map{"message": "login success", "token": token})
 }
