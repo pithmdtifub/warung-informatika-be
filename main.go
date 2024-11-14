@@ -17,6 +17,7 @@ func main() {
 	}
 
 	database.ConnectDatabase()
+
 	//database.Migrate()
 
 	app := fiber.New()
