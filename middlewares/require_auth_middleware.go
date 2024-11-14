@@ -20,9 +20,9 @@ func RequireAuth(c *fiber.Ctx) error {
 
 	tokenArray := strings.Split(tokenString, " ")
 	if len(tokenArray) == 1 {
-		tokenString = tokenArray[1]
-	} else if len(tokenArray) == 2 {
 		tokenString = tokenArray[0]
+	} else if len(tokenArray) == 2 {
+		tokenString = tokenArray[1]
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid token", "error": "invalid token"})
 	}
