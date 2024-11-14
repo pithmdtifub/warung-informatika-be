@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"os"
+	"strings"
 )
 
 func RequireAuth(c *fiber.Ctx) error {
@@ -17,7 +18,12 @@ func RequireAuth(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Token not found", "error": "token not found"})
 	}
 
-	tokenString = tokenString[7:]
+	tokenArray := strings.Split(tokenString, " ")
+	if len(tokenArray) > 1 {
+		tokenString = tokenArray[1]
+	} else {
+		tokenString = tokenArray[0]
+	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -30,6 +36,7 @@ func RequireAuth(c *fiber.Ctx) error {
 		if errors.Is(err, jwt.ErrTokenExpired) {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "token expired", "message": "Token expired"})
 		}
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid token", "error": err.Error()})
 	}
 
 	if !token.Valid {
