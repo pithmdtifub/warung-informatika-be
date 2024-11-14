@@ -6,8 +6,8 @@ import (
 	"warung-informatika-be/middlewares"
 )
 
-func AuthRoutes(app *fiber.App) {
-	api := app.Group("/api/v1/auth", middlewares.RequireJSONContent)
+func AuthRoutes(v fiber.Router) {
+	api := v.Group("/auth", middlewares.RequireJSONContent)
 
 	api.Post("/login", controllers.Login)
 }

@@ -6,8 +6,8 @@ import (
 	"warung-informatika-be/middlewares"
 )
 
-func MenuRoutes(app *fiber.App) {
-	api := app.Group("api/v1/menus/")
+func MenuRoutes(v fiber.Router) {
+	api := v.Group("/menus")
 
 	api.Get("/", controllers.GetMenus)
 	api.Get("/:id", controllers.GetMenu)
