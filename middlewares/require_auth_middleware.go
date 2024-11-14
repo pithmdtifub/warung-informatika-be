@@ -19,10 +19,12 @@ func RequireAuth(c *fiber.Ctx) error {
 	}
 
 	tokenArray := strings.Split(tokenString, " ")
-	if len(tokenArray) > 1 {
+	if len(tokenArray) == 1 {
 		tokenString = tokenArray[1]
-	} else {
+	} else if len(tokenArray) == 2 {
 		tokenString = tokenArray[0]
+	} else {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid token", "error": "invalid token"})
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
