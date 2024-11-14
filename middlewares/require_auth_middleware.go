@@ -38,7 +38,7 @@ func RequireAuth(c *fiber.Ctx) error {
 		if errors.Is(err, jwt.ErrTokenExpired) {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "token expired", "message": "Token expired"})
 		}
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid token", "error": err.Error()})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid token", "error": "invalid token"})
 	}
 
 	if !token.Valid {
