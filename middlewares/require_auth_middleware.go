@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -13,7 +14,7 @@ func RequireAuth(c *fiber.Ctx) error {
 
 	tokenString := c.Get("Authorization")
 	if tokenString == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Unauthorized", "error": "Token not found"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Token not found", "error": "token not found"})
 	}
 
 	tokenString = tokenString[7:]
@@ -25,8 +26,14 @@ func RequireAuth(c *fiber.Ctx) error {
 		return jwtKey, nil
 	})
 
-	if err != nil || !token.Valid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized", "message": "Invalid token"})
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "token expired", "message": "Token expired"})
+		}
+	}
+
+	if !token.Valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token", "message": "Invalid token"})
 	}
 
 	err = c.Next()
