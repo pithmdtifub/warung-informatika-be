@@ -10,4 +10,5 @@ func Routes(app *fiber.App) {
 
 	MenuRoutes(app)
 	CategoryRoutes(app)
+	AuthRoutes(app)
 }
