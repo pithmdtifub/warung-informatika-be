@@ -11,7 +11,7 @@ func MenuRoutes(app *fiber.App) {
 
 	api.Get("/", controllers.GetMenus)
 	api.Get("/:id", controllers.GetMenu)
-	api.Post("/", middlewares.RequireJSONContent, controllers.CreateMenu)
-	api.Put("/:id", controllers.UpdateMenu)
-	api.Delete("/:id", controllers.DeleteMenu)
+	api.Post("/", middlewares.RequireAuth, middlewares.RequireJSONContent, controllers.CreateMenu)
+	api.Put("/:id", middlewares.RequireAuth, controllers.UpdateMenu)
+	api.Delete("/:id", middlewares.RequireAuth, controllers.DeleteMenu)
 }
