@@ -8,7 +8,7 @@ import (
 func Routes(app *fiber.App) {
 	app.Use(middlewares.Logger)
 
+	AuthRoutes(app)
 	MenuRoutes(app)
 	CategoryRoutes(app)
-	AuthRoutes(app)
 }
