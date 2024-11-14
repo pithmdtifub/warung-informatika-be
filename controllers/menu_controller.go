@@ -16,7 +16,7 @@ func GetMenus(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get al menu", "data": menus})
+	return c.JSON(fiber.Map{"message": "Successfully get all menu", "data": menus})
 }
 
 func GetMenu(c *fiber.Ctx) error {
