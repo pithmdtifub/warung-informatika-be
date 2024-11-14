@@ -5,17 +5,20 @@ import (
 	"warung-informatika-be/models"
 )
 
-func GetUser(id any, username any) (models.User, error) {
+func GetUser(id int) (models.User, error) {
 	var user models.User
-	var err error
 
-	if id != nil {
-		err = db.DB.First(&user, id).Error
-	} else if username != nil {
-		err = db.DB.Where("username = ?", username).First(&user).Error
+	if err := db.DB.First(&user, id).Error; err != nil {
+		return models.User{}, err
 	}
 
-	if err != nil {
+	return user, nil
+}
+
+func GetUserByUsername(username string) (models.User, error) {
+	var user models.User
+
+	if err := db.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return models.User{}, err
 	}
 
