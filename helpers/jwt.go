@@ -6,12 +6,13 @@ import (
 	"time"
 )
 
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(username, role string) (string, error) {
 	key := os.Getenv("JWT_SECRET")
 	var jwtKey = []byte(key)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": username,
+		"role":     role,
 		"exp":      time.Now().Add(15 * time.Minute).Unix(),
 	})
 	tokenString, err := token.SignedString(jwtKey)
