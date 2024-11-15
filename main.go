@@ -20,6 +20,7 @@ func main() {
 
 	//database.MigrateDown()
 	//database.MigrateUp()
+	//seeders.Seed()
 
 	app := fiber.New()
 	app.Use(cors.New())
