@@ -15,9 +15,9 @@ func MigrateUp() {
 }
 
 func MigrateDown() {
-	DB.Exec("DROP TYPE IF EXISTS role;")
-
 	err := DB.Migrator().DropTable(&models.Category{}, &models.Menu{}, &models.User{})
+
+	DB.Exec("DROP TYPE IF EXISTS role;")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
