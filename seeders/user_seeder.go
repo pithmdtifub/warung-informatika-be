@@ -17,5 +17,4 @@ func UserSeeder(user models.User) {
 	if err := repo.CreateUser(&user); err != nil {
 		log.Fatal("Failed to create user")
 	}
-	log.Print(user)
 }
