@@ -22,7 +22,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // building the fiber application
 func handler() http.HandlerFunc {
 	database.ConnectDatabase()
-	//database.Migrate()
+	//database.MigrateDown()
+	//database.MigrateUp()
 
 	app := fiber.New()
 	app.Use(cors.New())

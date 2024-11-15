@@ -5,17 +5,19 @@ import (
 	"warung-informatika-be/models"
 )
 
-func Migrate() {
-	DB.Exec("DROP TYPE IF EXISTS role;")
+func MigrateUp() {
+	DB.Exec(`DO $$ BEGIN CREATE TYPE role AS ENUM ('User', 'Admin'); EXCEPTION WHEN duplicate_object THEN null; END $$;`)
 
-	err := DB.Migrator().DropTable(&models.Category{}, &models.Menu{}, &models.User{})
+	err := DB.AutoMigrate(&models.Category{}, &models.Menu{}, &models.User{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+}
 
-	DB.Exec(`DO $$ BEGIN CREATE TYPE role AS ENUM ('User', 'Admin'); EXCEPTION WHEN duplicate_object THEN null; END $$;`)
+func MigrateDown() {
+	DB.Exec("DROP TYPE IF EXISTS role;")
 
-	err = DB.AutoMigrate(&models.Category{}, &models.Menu{}, &models.User{})
+	err := DB.Migrator().DropTable(&models.Category{}, &models.Menu{}, &models.User{})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
