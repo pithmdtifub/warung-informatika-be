@@ -4,17 +4,29 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"warung-informatika-be/models"
-	"warung-informatika-be/repositories"
+	repo "warung-informatika-be/repositories"
 )
 
 func GetCategories(c *fiber.Ctx) error {
-	categories, err := repositories.GetCategories()
+	categories, err := repo.GetCategories()
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get all category", "categories": categories})
+	return c.JSON(fiber.Map{"message": "Successfully get all category", "data": categories})
+}
+
+func GetCategory(c *fiber.Ctx) error {
+	id, _ := c.ParamsInt("id")
+
+	category, _ := repo.GetCategory(id)
+
+	if category.ID < 1 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Category not found", "error": "category not found"})
+	}
+
+	return c.JSON(fiber.Map{"message": "Successfully get category", "data": category})
 }
 
 func CreateCategory(c *fiber.Ctx) error {
@@ -34,9 +46,9 @@ func CreateCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
 
-	if err := repositories.CreateCategory(category); err != nil {
+	if err := repo.CreateCategory(category); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create category", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Category created successfully", "category": category})
+	return c.JSON(fiber.Map{"message": "Category created successfully", "data": category})
 }
