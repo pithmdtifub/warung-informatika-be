@@ -6,3 +6,8 @@ type User struct {
 	Role     string `json:"role" gorm:"type:role;not null;default:'Admin'"`
 	Password string `json:"password" form:"password" validate:"required"`
 }
+
+const (
+	RoleUser  = "User"
+	RoleAdmin = "Admin"
+)
