@@ -2,16 +2,16 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"warung-informatika-be/controllers"
-	"warung-informatika-be/middlewares"
+	c "warung-informatika-be/controllers"
+	m "warung-informatika-be/middlewares"
 )
 
-func MenuRoutes(app *fiber.App) {
-	api := app.Group("api/v1/menus/")
+func MenuRoutes(v fiber.Router) {
+	api := v.Group("/menus")
 
-	api.Get("/", controllers.GetMenus)
-	api.Get("/:id", controllers.GetMenu)
-	api.Post("/", middlewares.RequireJSONContent, controllers.CreateMenu)
-	api.Put("/:id", controllers.UpdateMenu)
-	api.Delete("/:id", controllers.DeleteMenu)
+	api.Get("/", c.GetMenus)
+	api.Get("/:id", c.GetMenu)
+	api.Post("/", m.RequireAuth, m.RequireAdmin, m.RequireJSONContent, c.CreateMenu)
+	api.Put("/:id", m.RequireAuth, m.RequireAdmin, c.UpdateMenu)
+	api.Delete("/:id", m.RequireAuth, m.RequireAdmin, c.DeleteMenu)
 }

@@ -16,7 +16,7 @@ func GetMenus(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get al menu", "data": menus})
+	return c.JSON(fiber.Map{"message": "Successfully get all menu", "data": menus})
 }
 
 func GetMenu(c *fiber.Ctx) error {
@@ -28,7 +28,7 @@ func GetMenu(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Menu not found", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"status": "success", "menu": menu})
+	return c.JSON(fiber.Map{"message": "Successfully get menu", "menu": menu})
 }
 
 func CreateMenu(c *fiber.Ctx) error {
@@ -36,9 +36,13 @@ func CreateMenu(c *fiber.Ctx) error {
 
 	var menu models.Menu
 
-	_ = c.BodyParser(&menu)
+	err := c.BodyParser(&menu)
 
-	if err := validate.Struct(menu); err != nil {
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
+	}
+
+	if err = validate.Struct(menu); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
@@ -50,7 +54,7 @@ func CreateMenu(c *fiber.Ctx) error {
 
 	var category models.Category
 	if err := db.DB.First(&category, menu.CategoryID).Error; err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Category ID not valid", "error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": err.Error()})
 	}
 
 	menu.CategoryName = category.Name
