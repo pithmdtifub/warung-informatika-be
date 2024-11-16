@@ -13,10 +13,11 @@ import (
 
 func GetMenus(c *fiber.Ctx) error {
 	search := c.Query("search", "")
+	categoryID, _ := strconv.Atoi(c.Query("category_id", "0"))
 	limit, _ := strconv.Atoi(c.Query("limit", "10"))
 	offset, _ := strconv.Atoi(c.Query("offset", "0"))
 
-	menus, err := repositories.GetMenus(search, limit,offset)
+	menus, err := repositories.GetMenus(search, categoryID, limit, offset)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})

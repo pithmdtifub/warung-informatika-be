@@ -7,12 +7,16 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func GetMenus(search string, limit, offset int) ([]models.Menu, error) {
+func GetMenus(search string, categoryID, limit, offset int) ([]models.Menu, error) {
 	var menus []models.Menu
 	query := db.DB.Preload(clause.Associations).Limit(limit).Offset(offset)
 
+	if categoryID > 0 {
+		query = query.Where("category_id = ?", categoryID)
+	}
+
 	if search != "" {
-		query = query.Where("name ILIKE ? OR category_name ILIKE ?", "%"+search+"%", "%"+search+"%")
+		query = query.Where("name ILIKE ?", "%"+search+"%")
 	}
 
 	err := query.Find(&menus).Error
