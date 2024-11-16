@@ -1,14 +1,19 @@
 package controllers
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	"strconv"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetCategories(c *fiber.Ctx) error {
-	categories, err := repositories.GetCategories()
+	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	offset, _ := strconv.Atoi(c.Query("offset", "0"))
+
+	categories, err := repositories.GetCategories(limit, offset)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})

@@ -1,14 +1,15 @@
 package repositories
 
 import (
-	"gorm.io/gorm/clause"
 	db "warung-informatika-be/database"
 	"warung-informatika-be/models"
+
+	"gorm.io/gorm/clause"
 )
 
-func GetMenus() ([]models.Menu, error) {
+func GetMenus(limit, offset int) ([]models.Menu, error) {
 	var menus []models.Menu
-	err := db.DB.Preload(clause.Associations).Find(&menus).Error
+	err := db.DB.Preload(clause.Associations).Limit(limit).Offset(offset).Find(&menus).Error
 
 	for i := range menus {
 		menus[i].CategoryName = menus[i].Category.Name

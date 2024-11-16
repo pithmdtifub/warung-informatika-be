@@ -2,15 +2,20 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	"strconv"
 	db "warung-informatika-be/database"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetMenus(c *fiber.Ctx) error {
-	menus, err := repositories.GetMenus()
+	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	offset, _ := strconv.Atoi(c.Query("offset", "0"))
+
+	menus, err := repositories.GetMenus(limit, offset)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
