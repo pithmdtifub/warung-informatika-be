@@ -10,10 +10,6 @@ func GetMenus() ([]models.Menu, error) {
 	var menus []models.Menu
 	err := db.DB.Preload(clause.Associations).Find(&menus).Error
 
-	for i := range menus {
-		menus[i].CategoryName = menus[i].Category.Name
-	}
-
 	return menus, err
 }
 
@@ -21,9 +17,14 @@ func GetMenu(id int) (models.Menu, error) {
 	var menu models.Menu
 	err := db.DB.Preload(clause.Associations).First(&menu, id).Error
 
-	menu.CategoryName = menu.Category.Name
-
 	return menu, err
+}
+
+func GetMenusByCategoryId(id int) ([]models.Menu, error) {
+	var menus []models.Menu
+	err := db.DB.Preload(clause.Associations).Where("category_id = ?", uint(id)).Find(&menus).Error
+
+	return menus, err
 }
 
 func CreateMenu(menu *models.Menu) error {
