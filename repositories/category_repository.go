@@ -13,8 +13,8 @@ func GetCategories() ([]models.Category, error) {
 }
 
 func GetCategory(id int) (models.Category, error) {
-	var category models.Category
-	err := db.DB.Find(&category, id).Error
+	category := models.Category{ID: uint(id)}
+	err := db.DB.Find(&category).Error
 
 	return category, err
 }
