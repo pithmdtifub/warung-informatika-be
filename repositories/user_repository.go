@@ -9,7 +9,7 @@ func GetUserByUsername(username string) (models.User, error) {
 	var user models.User
 
 	if err := db.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		return models.User{}, err
+		return user, err
 	}
 
 	return user, nil

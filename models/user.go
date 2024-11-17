@@ -7,10 +7,10 @@ import (
 )
 
 type User struct {
-	ID       uuid.UUID `json:"id" gorm:"primaryKey"`
-	Username string    `json:"username" form:"username" validate:"required"`
-	Role     string    `json:"role" gorm:"type:role;not null;default:'Admin'"`
-	Password string    `json:"password" form:"password" validate:"required"`
+	ID       uuid.UUID `gorm:"primaryKey"`
+	Username string
+	Role     string `gorm:"type:role;not null;default:'Admin'"`
+	Password string
 }
 
 const (

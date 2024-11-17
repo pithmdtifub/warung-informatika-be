@@ -4,23 +4,21 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"warung-informatika-be/dto"
 	"warung-informatika-be/helpers"
-	"warung-informatika-be/models"
 	repo "warung-informatika-be/repositories"
 )
 
 func Login(c *fiber.Ctx) error {
-	var validate = validator.New()
+	validate := validator.New()
 
-	var user models.User
+	var userReq dto.UserRequest
 
-	err := c.BodyParser(&user)
-
-	if err != nil {
+	if err := c.BodyParser(&userReq); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
 	}
 
-	if err = validate.Struct(user); err != nil {
+	if err := validate.Struct(userReq); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
@@ -29,15 +27,15 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
 
-	userDB, _ := repo.GetUserByUsername(user.Username)
-	if userDB.Username == "" {
+	userDB, err := repo.GetUserByUsername(userReq.Username)
+	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	if !helpers.VerifyPassword(user.Password, userDB.Password) {
+	if !helpers.VerifyPassword(userReq.Password, userDB.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	token, err := helpers.GenerateJWT(user.Username, userDB.Role)
+	token, err := helpers.GenerateJWT(userReq.Username, userDB.Role)
 	return c.JSON(fiber.Map{"message": "login success", "token": token})
 }
