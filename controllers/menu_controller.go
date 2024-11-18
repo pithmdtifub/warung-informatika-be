@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"strconv"
 	db "warung-informatika-be/database"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
@@ -13,17 +12,21 @@ import (
 
 func GetMenus(c *fiber.Ctx) error {
 	search := c.Query("search", "")
-	categoryID, _ := strconv.Atoi(c.Query("category_id", "0"))
-	limit, _ := strconv.Atoi(c.Query("limit", "10"))
-	offset, _ := strconv.Atoi(c.Query("offset", "0"))
+	category := c.QueryInt("category", 0)
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
 
-	menus, err := repositories.GetMenus(search, categoryID, limit, offset)
+	menus, err := repositories.GetMenus(search, category, page, limit)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get all menu", "data": menus})
+	if len(menus) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "No menus found with the given criteria", "data": []models.Menu{}})
+	}
+
+	return c.JSON(fiber.Map{"message": "Successfully get all menus", "data": menus})
 }
 
 func GetMenu(c *fiber.Ctx) error {
