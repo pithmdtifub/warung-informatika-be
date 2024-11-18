@@ -5,7 +5,6 @@ type CategoryRequest struct {
 }
 
 type CategoryResponse struct {
-	ID    uint           `json:"id"`
-	Name  string         `json:"name"`
-	Menus []MenuResponse `json:"menus"`
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }

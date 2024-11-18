@@ -18,25 +18,9 @@ func GetCategories(c *fiber.Ctx) error {
 	categoriesRes := make([]dto.CategoryResponse, 0)
 
 	for _, category := range categories {
-		menusRes := make([]dto.MenuResponse, 0)
-		menus, _ := repo.GetMenusByCategoryId(int(category.ID))
-
-		for _, menu := range menus {
-			menusRes = append(menusRes, dto.MenuResponse{
-				ID:           menu.ID,
-				Name:         menu.Name,
-				Description:  menu.Description,
-				Price:        menu.Price,
-				CategoryID:   menu.CategoryID,
-				CategoryName: menu.Category.Name,
-				Image:        menu.Image,
-			})
-		}
-
 		categoriesRes = append(categoriesRes, dto.CategoryResponse{
-			ID:    category.ID,
-			Name:  category.Name,
-			Menus: menusRes,
+			ID:   category.ID,
+			Name: category.Name,
 		})
 	}
 
@@ -49,32 +33,16 @@ func GetCategory(c *fiber.Ctx) error {
 	category, err := repo.GetCategory(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get category", "error": err.Error()})
 	}
 
 	if category.Name == "" {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Category not found", "error": "category not found"})
 	}
 
-	menuRes := make([]dto.MenuResponse, 0)
-	menus, err := repo.GetMenusByCategoryId(int(category.ID))
-
-	for _, menu := range menus {
-		menuRes = append(menuRes, dto.MenuResponse{
-			ID:           menu.ID,
-			Name:         menu.Name,
-			Description:  menu.Description,
-			Price:        menu.Price,
-			CategoryID:   menu.CategoryID,
-			CategoryName: menu.Category.Name,
-			Image:        menu.Image,
-		})
-	}
-
 	categoryRes := dto.CategoryResponse{
-		ID:    category.ID,
-		Name:  category.Name,
-		Menus: menuRes,
+		ID:   category.ID,
+		Name: category.Name,
 	}
 
 	return c.JSON(fiber.Map{"message": "Successfully get category", "data": categoryRes})
@@ -104,9 +72,8 @@ func CreateCategory(c *fiber.Ctx) error {
 	}
 
 	categoryRes := dto.CategoryResponse{
-		ID:    category.ID,
-		Name:  category.Name,
-		Menus: make([]dto.MenuResponse, 0),
+		ID:   category.ID,
+		Name: category.Name,
 	}
 
 	return c.JSON(fiber.Map{"message": "Category created successfully", "data": categoryRes})
