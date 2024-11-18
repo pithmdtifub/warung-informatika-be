@@ -34,7 +34,11 @@ func GetMenus(c *fiber.Ctx) error {
 }
 
 func GetMenu(c *fiber.Ctx) error {
-	id, _ := c.ParamsInt("id")
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to get menu", "error": "Invalid menu id"})
+	}
 
 	menu, err := repositories.GetMenu(id)
 
@@ -76,7 +80,11 @@ func CreateMenu(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
 
-	category, _ := repositories.GetCategory(int(menuReq.CategoryID))
+	category, err := repositories.GetCategory(int(menuReq.CategoryID))
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
+	}
 
 	if category.Name == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": "category not found"})
