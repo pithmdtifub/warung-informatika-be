@@ -41,5 +41,5 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	token, err := helpers.GenerateJWT(userReq.Username, userDB.Role)
-	return c.JSON(fiber.Map{"message": "login success", "token": token})
+	return c.JSON(fiber.Map{"message": "Login success", "token": token})
 }
