@@ -104,7 +104,7 @@ func CreateMenu(c *fiber.Ctx) error {
 		Image:       menuReq.Image,
 	}
 
-	if err := repositories.CreateMenu(menu); err != nil {
+	if err := repositories.CreateMenu(&menu); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
 	}
 

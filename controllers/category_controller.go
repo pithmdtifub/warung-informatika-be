@@ -79,7 +79,7 @@ func CreateCategory(c *fiber.Ctx) error {
 
 	category := models.Category{Name: categoryReq.Name}
 
-	if err := repo.CreateCategory(category); err != nil {
+	if err := repo.CreateCategory(&category); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create category", "error": err.Error()})
 	}
 
@@ -127,7 +127,7 @@ func UpdateCategory(c *fiber.Ctx) error {
 
 	category.Name = categoryReq.Name
 
-	if err := repo.UpdateCategory(category); err != nil {
+	if err := repo.UpdateCategory(&category); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to update category", "error": err.Error()})
 	}
 

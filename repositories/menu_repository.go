@@ -20,7 +20,7 @@ func GetMenu(id int) (models.Menu, error) {
 	return menu, err
 }
 
-func CreateMenu(menu models.Menu) error {
+func CreateMenu(menu *models.Menu) error {
 	return db.DB.Create(menu).Error
 }
 
