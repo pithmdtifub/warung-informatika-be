@@ -15,10 +15,10 @@ func GetCategories(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})
 	}
 
-	var categoriesRes []dto.CategoryResponse
+	categoriesRes := make([]dto.CategoryResponse, 0)
 
 	for _, category := range categories {
-		var menusRes []dto.MenuResponse
+		menusRes := make([]dto.MenuResponse, 0)
 		menus, _ := repo.GetMenusByCategoryId(int(category.ID))
 
 		for _, menu := range menus {
@@ -31,10 +31,6 @@ func GetCategories(c *fiber.Ctx) error {
 				CategoryName: menu.Category.Name,
 				Image:        menu.Image,
 			})
-		}
-
-		if len(menusRes) < 1 {
-			menusRes = []dto.MenuResponse{}
 		}
 
 		categoriesRes = append(categoriesRes, dto.CategoryResponse{
@@ -60,7 +56,7 @@ func GetCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Category not found", "error": "category not found"})
 	}
 
-	var menuRes []dto.MenuResponse
+	menuRes := make([]dto.MenuResponse, 0)
 	menus, err := repo.GetMenusByCategoryId(int(category.ID))
 
 	for _, menu := range menus {
@@ -79,10 +75,6 @@ func GetCategory(c *fiber.Ctx) error {
 		ID:    category.ID,
 		Name:  category.Name,
 		Menus: menuRes,
-	}
-
-	if len(menuRes) < 1 {
-		categoryRes.Menus = []dto.MenuResponse{}
 	}
 
 	return c.JSON(fiber.Map{"message": "Successfully get category", "data": categoryRes})
@@ -114,7 +106,7 @@ func CreateCategory(c *fiber.Ctx) error {
 	categoryRes := dto.CategoryResponse{
 		ID:    category.ID,
 		Name:  category.Name,
-		Menus: []dto.MenuResponse{},
+		Menus: make([]dto.MenuResponse, 0),
 	}
 
 	return c.JSON(fiber.Map{"message": "Category created successfully", "data": categoryRes})
