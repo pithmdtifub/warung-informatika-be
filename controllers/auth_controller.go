@@ -29,6 +29,10 @@ func Login(c *fiber.Ctx) error {
 
 	userDB, err := repo.GetUserByUsername(userReq.Username)
 	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Failed to login", "error": err})
+	}
+
+	if userDB.Username == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
