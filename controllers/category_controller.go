@@ -32,13 +32,13 @@ func GetCategory(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to get category", "error": "invalid category id"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
 	}
 
 	category, err := repo.GetCategory(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
 	}
 
 	categoryRes := dto.CategoryResponse{
@@ -109,7 +109,8 @@ func UpdateCategory(c *fiber.Ctx) error {
 	if err := validate.Struct(categoryReq); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
+			field := strings.ToLower(err.Field())
+			errors[field] = "Error on " + field + ": " + err.Tag()
 		}
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}

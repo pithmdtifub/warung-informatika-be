@@ -37,13 +37,13 @@ func GetMenu(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to get menu", "error": "Invalid menu id"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get menu", "error": "menu not found"})
 	}
 
 	menu, err := repositories.GetMenu(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Menu not found", "error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Menu not found", "error": "menu not found"})
 	}
 
 	menuRes := dto.MenuResponse{
@@ -82,12 +82,12 @@ func CreateMenu(c *fiber.Ctx) error {
 
 	category, err := repositories.GetCategory(int(menuReq.CategoryID))
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
-	}
-
 	if category.Name == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": "category not found"})
+	}
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
 	}
 
 	menu := models.Menu{
