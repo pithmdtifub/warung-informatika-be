@@ -97,7 +97,7 @@ func UpdateCategory(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to update category", "error": "invalid category id"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
 	}
 
 	category, err := repo.GetCategory(id)
@@ -143,7 +143,7 @@ func DeleteCategory(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to delete category", "error": "invalid category id"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "category not found"})
 	}
 
 	err = repo.DeleteCategory(id)

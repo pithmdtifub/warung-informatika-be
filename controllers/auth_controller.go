@@ -21,12 +21,12 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if err := validate.Struct(userReq); err != nil {
-		errors := make(map[string]string)
+		_errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
-			errors[field] = "Error on " + field + ": " + err.Tag()
+			_errors[field] = "Error on " + field + ": " + err.Tag()
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
 	}
 
 	userDB, err := repo.GetUserByUsername(userReq.Username)
@@ -35,7 +35,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Failed to login", "error": err})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to login", "error": err})
 	}
 
 	if !helpers.VerifyPassword(userReq.Password, userDB.Password) {

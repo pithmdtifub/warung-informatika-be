@@ -73,7 +73,7 @@ func CreateMenu(c *fiber.Ctx) error {
 	err := c.BodyParser(&menuReq)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
 	}
 
 	if err = validate.Struct(menuReq); err != nil {
@@ -87,6 +87,10 @@ func CreateMenu(c *fiber.Ctx) error {
 	}
 
 	category, err := repositories.GetCategory(int(menuReq.CategoryID))
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to create menu", "error": "category not found"})
+	}
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
