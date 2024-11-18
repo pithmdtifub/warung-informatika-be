@@ -1,43 +1,47 @@
 package controllers
 
 import (
-	"fmt"
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+	"strings"
+	"warung-informatika-be/dto"
 	"warung-informatika-be/helpers"
-	"warung-informatika-be/models"
 	repo "warung-informatika-be/repositories"
 )
 
 func Login(c *fiber.Ctx) error {
-	var validate = validator.New()
+	validate := validator.New()
 
-	var user models.User
+	var userReq dto.UserRequest
 
-	err := c.BodyParser(&user)
-
-	if err != nil {
+	if err := c.BodyParser(&userReq); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
 	}
 
-	if err = validate.Struct(user); err != nil {
-		errors := make(map[string]string)
+	if err := validate.Struct(userReq); err != nil {
+		_errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
-			fmt.Print(err.StructField())
+			field := strings.ToLower(err.Field())
+			_errors[field] = "Error on " + field + ": " + err.Tag()
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
 	}
 
-	userDB, _ := repo.GetUserByUsername(user.Username)
-	if userDB.ID == 0 {
+	userDB, err := repo.GetUserByUsername(userReq.Username)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	if !helpers.VerifyPassword(user.Password, userDB.Password) {
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to login", "error": err})
+	}
+
+	if !helpers.VerifyPassword(userReq.Password, userDB.Password) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	token, err := helpers.GenerateJWT(user.Username, userDB.Role)
-	return c.JSON(fiber.Map{"message": "login success", "token": token})
+	token, err := helpers.GenerateJWT(userReq.Username, userDB.Role)
+	return c.JSON(fiber.Map{"message": "Login success", "token": token})
 }

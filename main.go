@@ -18,7 +18,9 @@ func main() {
 
 	database.ConnectDatabase()
 
-	//database.Migrate()
+	//database.MigrateDown()
+	//database.MigrateUp()
+	//seeders.Seed()
 
 	app := fiber.New()
 	app.Use(cors.New())

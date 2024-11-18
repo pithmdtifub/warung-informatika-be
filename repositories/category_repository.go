@@ -7,18 +7,29 @@ import (
 
 func GetCategories() ([]models.Category, error) {
 	var categories []models.Category
-	err := db.DB.Find(&categories).Error
+	err := db.DB.Order("id").Find(&categories).Error
 
 	return categories, err
 }
 
-func GetCategory(id int) error {
-	var category models.Category
-	err := db.DB.Find(&category, id).Error
+func GetCategory(id int) (models.Category, error) {
+	category := models.Category{ID: uint(id)}
+	err := db.DB.First(&category).Error
 
-	return err
+	return category, err
 }
 
 func CreateCategory(category *models.Category) error {
 	return db.DB.Create(category).Error
+}
+
+func UpdateCategory(category *models.Category) error {
+	return db.DB.Save(category).Error
+}
+
+func DeleteCategory(id int) error {
+	category := models.Category{ID: uint(id)}
+	err := db.DB.Delete(&category).Error
+
+	return err
 }
