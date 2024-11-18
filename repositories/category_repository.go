@@ -12,9 +12,9 @@ func GetCategories() ([]models.Category, error) {
 	return categories, err
 }
 
-func GetCategory(id int) (models.Category, error) {
-	category := models.Category{ID: uint(id)}
-	err := db.DB.First(&category).Error
+func GetCategory(id uint) (models.Category, error) {
+	var category models.Category
+	err := db.DB.First(&category, id).Error
 
 	return category, err
 }
@@ -27,8 +27,8 @@ func UpdateCategory(category *models.Category) error {
 	return db.DB.Save(category).Error
 }
 
-func DeleteCategory(id int) error {
-	category := models.Category{ID: uint(id)}
+func DeleteCategory(id uint) error {
+	category := models.Category{ID: id}
 	err := db.DB.Delete(&category).Error
 
 	return err
