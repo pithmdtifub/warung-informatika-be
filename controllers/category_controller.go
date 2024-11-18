@@ -52,7 +52,7 @@ func GetCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})
 	}
 
-	if category.ID < 1 {
+	if category.Name == "" {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Category not found", "error": "category not found"})
 	}
 
