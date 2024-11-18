@@ -19,7 +19,7 @@ func GetCategory(id int) (models.Category, error) {
 	return category, err
 }
 
-func CreateCategory(category *models.Category) error {
+func CreateCategory(category models.Category) error {
 	return db.DB.Create(category).Error
 }
 
