@@ -16,7 +16,8 @@ func GetMenus(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
 	}
 
-	var menusRes []dto.MenuResponse
+	menusRes := make([]dto.MenuResponse, 0)
+
 	for _, menu := range menus {
 		menusRes = append(menusRes, dto.MenuResponse{
 			ID:           menu.ID,
