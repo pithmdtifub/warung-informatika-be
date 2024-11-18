@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
 	repo "warung-informatika-be/repositories"
@@ -28,7 +29,11 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 func GetCategory(c *fiber.Ctx) error {
-	id, _ := c.ParamsInt("id")
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to get category", "error": "invalid category id"})
+	}
 
 	category, err := repo.GetCategory(id)
 
@@ -51,7 +56,7 @@ func GetCategory(c *fiber.Ctx) error {
 func CreateCategory(c *fiber.Ctx) error {
 	validate := validator.New()
 
-	var categoryReq dto.CategoryRequest
+	categoryReq := new(dto.CategoryRequest)
 
 	if err := c.BodyParser(&categoryReq); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err.Error()})
@@ -60,7 +65,8 @@ func CreateCategory(c *fiber.Ctx) error {
 	if err := validate.Struct(categoryReq); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
+			field := strings.ToLower(err.Field())
+			errors[field] = "Error on " + field + ": " + err.Tag()
 		}
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
@@ -77,6 +83,53 @@ func CreateCategory(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"message": "Category created successfully", "data": categoryRes})
+}
+
+func UpdateCategory(c *fiber.Ctx) error {
+	validate := validator.New()
+
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to update category", "error": "invalid category id"})
+	}
+
+	category, err := repo.GetCategory(id)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to update category", "error": err.Error()})
+	}
+
+	if category.Name == "" {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
+	}
+
+	categoryReq := new(dto.CategoryUpdateRequest)
+
+	if err := c.BodyParser(categoryReq); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err.Error()})
+	}
+
+	if err := validate.Struct(categoryReq); err != nil {
+		errors := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+	}
+
+	category.Name = categoryReq.Name
+
+	if err := repo.UpdateCategory(category); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to update category", "error": err.Error()})
+	}
+
+	categoryRes := dto.CategoryResponse{
+		ID:   category.ID,
+		Name: category.Name,
+	}
+
+	return c.JSON(fiber.Map{"message": "Category updated successfully", "data": categoryRes})
 }
 
 func DeleteCategory(c *fiber.Ctx) error {

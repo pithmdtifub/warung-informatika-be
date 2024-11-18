@@ -23,6 +23,10 @@ func CreateCategory(category *models.Category) error {
 	return db.DB.Create(category).Error
 }
 
+func UpdateCategory(category models.Category) error {
+	return db.DB.Save(&category).Error
+}
+
 func DeleteCategory(id int) error {
 	category := models.Category{ID: uint(id)}
 	err := db.DB.Delete(&category).Error
