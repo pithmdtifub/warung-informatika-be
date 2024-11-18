@@ -31,7 +31,10 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 func GetCategory(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+	param := struct {
+		ID uint `params:"id"`
+	}{}
+	err := c.ParamsParser(&param)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
@@ -41,7 +44,7 @@ func GetCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to get category", "error": "invalid category id"})
 	}
 
-	category, err := repo.GetCategory(id)
+	category, err := repo.GetCategory(param.ID)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
@@ -92,15 +95,18 @@ func CreateCategory(c *fiber.Ctx) error {
 }
 
 func UpdateCategory(c *fiber.Ctx) error {
-	validate := validator.New()
+	param := struct {
+		ID uint `params:"id"`
+	}{}
+	err := c.ParamsParser(&param)
 
-	id, err := c.ParamsInt("id")
+	validate := validator.New()
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
 	}
 
-	category, err := repo.GetCategory(id)
+	category, err := repo.GetCategory(param.ID)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
@@ -140,13 +146,16 @@ func UpdateCategory(c *fiber.Ctx) error {
 }
 
 func DeleteCategory(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+	param := struct {
+		ID uint `params:"id"`
+	}{}
+	err := c.ParamsParser(&param)
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "category not found"})
 	}
 
-	err = repo.DeleteCategory(id)
+	err = repo.DeleteCategory(param.ID)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to delete category", "error": err})

@@ -36,13 +36,16 @@ func GetMenus(c *fiber.Ctx) error {
 }
 
 func GetMenu(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+	param := struct {
+		ID uint `params:"id"`
+	}{}
+	err := c.ParamsParser(&param)
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get menu", "error": "menu not found"})
 	}
 
-	menu, err := repositories.GetMenu(id)
+	menu, err := repositories.GetMenu(param.ID)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Menu not found", "error": "menu not found"})
@@ -86,7 +89,7 @@ func CreateMenu(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
 	}
 
-	category, err := repositories.GetCategory(int(menuReq.CategoryID))
+	category, err := repositories.GetCategory(menuReq.CategoryID)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to create menu", "error": "category not found"})
