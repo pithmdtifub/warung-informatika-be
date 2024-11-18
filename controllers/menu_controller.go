@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	db "warung-informatika-be/database"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
@@ -74,10 +73,10 @@ func CreateMenu(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
 
-	category := models.Category{ID: menuReq.CategoryID}
+	category, _ := repositories.GetCategory(int(menuReq.CategoryID))
 
-	if err := db.DB.First(&category).Error; err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": err.Error()})
+	if category.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": "category not found"})
 	}
 
 	menu := models.Menu{
