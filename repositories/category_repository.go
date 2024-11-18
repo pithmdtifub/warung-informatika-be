@@ -5,9 +5,9 @@ import (
 	"warung-informatika-be/models"
 )
 
-func GetCategories(limit, offset int) ([]models.Category, error) {
+func GetCategories() ([]models.Category, error) {
 	var categories []models.Category
-	err := db.DB.Limit(limit).Offset(offset).Find(&categories).Error
+	err := db.DB.Find(&categories).Error
 
 	return categories, err
 }

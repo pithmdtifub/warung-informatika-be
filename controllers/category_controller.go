@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"strconv"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
 
@@ -10,16 +9,13 @@ import (
 )
 
 func GetCategories(c *fiber.Ctx) error {
-	limit, _ := strconv.Atoi(c.Query("limit", "10"))
-	offset, _ := strconv.Atoi(c.Query("offset", "0"))
-
-	categories, err := repositories.GetCategories(limit, offset)
+	categories, err := repositories.GetCategories()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all categories", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get all category", "categories": categories})
+	return c.JSON(fiber.Map{"message": "Successfully get all categories", "categories": categories})
 }
 
 func CreateCategory(c *fiber.Ctx) error {
