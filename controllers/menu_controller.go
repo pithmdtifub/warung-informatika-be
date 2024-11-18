@@ -89,7 +89,7 @@ func CreateMenu(c *fiber.Ctx) error {
 	category, err := repositories.GetCategory(int(menuReq.CategoryID))
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to create menu", "error": "category not found"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to create menu", "error": "category not found"})
 	}
 
 	if err != nil {
