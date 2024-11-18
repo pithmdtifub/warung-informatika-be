@@ -78,3 +78,19 @@ func CreateCategory(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"message": "Category created successfully", "data": categoryRes})
 }
+
+func DeleteCategory(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to delete category", "error": "invalid category id"})
+	}
+
+	err = repo.DeleteCategory(id)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to delete category", "error": err})
+	}
+
+	return c.JSON(fiber.Map{"message": "Category deleted successfully"})
+}
