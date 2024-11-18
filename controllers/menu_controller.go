@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
@@ -56,7 +57,7 @@ func GetMenu(c *fiber.Ctx) error {
 func CreateMenu(c *fiber.Ctx) error {
 	validate := validator.New()
 
-	var menuReq dto.MenuRequest
+	menuReq := new(dto.MenuRequest)
 
 	err := c.BodyParser(&menuReq)
 
@@ -67,7 +68,8 @@ func CreateMenu(c *fiber.Ctx) error {
 	if err = validate.Struct(menuReq); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
+			field := strings.ToLower(err.Field())
+			errors[field] = "Error on " + field + ": " + err.Tag()
 		}
 
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
