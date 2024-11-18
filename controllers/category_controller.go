@@ -38,11 +38,7 @@ func GetCategory(c *fiber.Ctx) error {
 	category, err := repo.GetCategory(id)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get category", "error": err.Error()})
-	}
-
-	if category.Name == "" {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Category not found", "error": "category not found"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": err.Error()})
 	}
 
 	categoryRes := dto.CategoryResponse{
