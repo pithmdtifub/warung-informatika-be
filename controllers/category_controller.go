@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
@@ -31,14 +33,22 @@ func GetCategories(c *fiber.Ctx) error {
 func GetCategory(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
+	}
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to get category", "error": "invalid category id"})
 	}
 
 	category, err := repo.GetCategory(id)
 
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
+	}
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get category", "error": err.Error()})
 	}
 
 	categoryRes := dto.CategoryResponse{
@@ -59,17 +69,17 @@ func CreateCategory(c *fiber.Ctx) error {
 	}
 
 	if err := validate.Struct(categoryReq); err != nil {
-		errors := make(map[string]string)
+		_errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
-			errors[field] = "Error on " + field + ": " + err.Tag()
+			_errors[field] = "Error on " + field + ": " + err.Tag()
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
 	}
 
 	category := models.Category{Name: categoryReq.Name}
 
-	if err := repo.CreateCategory(&category); err != nil {
+	if err := repo.CreateCategory(category); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create category", "error": err.Error()})
 	}
 
@@ -92,12 +102,12 @@ func UpdateCategory(c *fiber.Ctx) error {
 
 	category, err := repo.GetCategory(id)
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to update category", "error": err.Error()})
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
 	}
 
-	if category.Name == "" {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to update category", "error": err.Error()})
 	}
 
 	categoryReq := new(dto.CategoryUpdateRequest)
@@ -107,12 +117,12 @@ func UpdateCategory(c *fiber.Ctx) error {
 	}
 
 	if err := validate.Struct(categoryReq); err != nil {
-		errors := make(map[string]string)
+		_errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
-			errors[field] = "Error on " + field + ": " + err.Tag()
+			_errors[field] = "Error on " + field + ": " + err.Tag()
 		}
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
 	}
 
 	category.Name = categoryReq.Name

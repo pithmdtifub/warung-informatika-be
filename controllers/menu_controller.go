@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
@@ -42,8 +44,12 @@ func GetMenu(c *fiber.Ctx) error {
 
 	menu, err := repositories.GetMenu(id)
 
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Menu not found", "error": "menu not found"})
+	}
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menu", "error": err.Error()})
 	}
 
 	menuRes := dto.MenuResponse{
@@ -71,20 +77,16 @@ func CreateMenu(c *fiber.Ctx) error {
 	}
 
 	if err = validate.Struct(menuReq); err != nil {
-		errors := make(map[string]string)
+		_errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.ToLower(err.Field())
-			errors[field] = "Error on " + field + ": " + err.Tag()
+			_errors[field] = "Error on " + field + ": " + err.Tag()
 		}
 
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
 	}
 
 	category, err := repositories.GetCategory(int(menuReq.CategoryID))
-
-	if category.Name == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid category id", "error": "category not found"})
-	}
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
@@ -98,7 +100,7 @@ func CreateMenu(c *fiber.Ctx) error {
 		Image:       menuReq.Image,
 	}
 
-	if err := repositories.CreateMenu(&menu); err != nil {
+	if err := repositories.CreateMenu(menu); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
 	}
 
