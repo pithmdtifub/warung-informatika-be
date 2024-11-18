@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/helpers"
@@ -28,12 +30,12 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	userDB, err := repo.GetUserByUsername(userReq.Username)
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Failed to login", "error": err})
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
 	}
 
-	if userDB.Username == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid credentials", "error": "incorrect username or password"})
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Failed to login", "error": err})
 	}
 
 	if !helpers.VerifyPassword(userReq.Password, userDB.Password) {
