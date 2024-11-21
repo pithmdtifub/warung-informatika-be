@@ -12,11 +12,11 @@ func GetCategories() ([]models.Category, error) {
 	return categories, err
 }
 
-func GetCategory(id int) error {
+func GetCategory(id uint) (models.Category, error) {
 	var category models.Category
-	err := db.DB.Find(&category, id).Error
+	err := db.DB.First(&category, id).Error
 
-	return err
+	return category, err
 }
 
 func CreateCategory(category *models.Category) error {
