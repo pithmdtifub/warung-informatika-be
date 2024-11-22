@@ -14,7 +14,7 @@ func RequireAdmin(c *fiber.Ctx) error {
 	}
 
 	if claims["role"] != models.RoleAdmin {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"message": "Unauthorized", "error": "You are not authorized to access this resource"})
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"message": "Forbidden", "error": "You are not allowed to access this resource"})
 	}
 
 	err := c.Next()
