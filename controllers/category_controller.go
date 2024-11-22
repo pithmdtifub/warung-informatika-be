@@ -105,7 +105,7 @@ func UpdateCategory(c *fiber.Ctx) error {
 	category, err := repo.GetCategory(param.ID)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not exist"})
 	}
 
 	if err != nil {
