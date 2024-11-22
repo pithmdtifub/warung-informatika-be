@@ -151,6 +151,12 @@ func DeleteCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "category not found"})
 	}
 
+	_, err = repo.GetCategory(param.ID)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "Category not exist"})
+	}
+
 	err = repo.DeleteCategory(param.ID)
 
 	if err != nil {
