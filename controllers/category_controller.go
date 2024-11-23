@@ -31,7 +31,7 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 func GetCategory(c *fiber.Ctx) error {
-	param := dto.MenuParams{}
+	param := dto.CategoryParams{}
 	err := c.ParamsParser(&param)
 
 	if err != nil {
