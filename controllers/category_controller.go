@@ -31,9 +31,7 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 func GetCategory(c *fiber.Ctx) error {
-	param := struct {
-		ID uint `params:"id"`
-	}{}
+	param := dto.MenuParams{}
 	err := c.ParamsParser(&param)
 
 	if err != nil {
@@ -138,9 +136,7 @@ func UpdateCategory(c *fiber.Ctx) error {
 }
 
 func DeleteCategory(c *fiber.Ctx) error {
-	param := struct {
-		ID uint `params:"id"`
-	}{}
+	param := dto.CategoryParams{}
 	err := c.ParamsParser(&param)
 
 	if err != nil {
