@@ -35,7 +35,7 @@ func GetCategory(c *fiber.Ctx) error {
 	err := c.ParamsParser(&param)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get category", "error": "category not found"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": "Failed to parse get category request", "error": err.Error()})
 	}
 
 	category, err := repo.GetCategory(param.ID)
