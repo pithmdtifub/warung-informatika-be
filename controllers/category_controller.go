@@ -98,10 +98,6 @@ func UpdateCategory(c *fiber.Ctx) error {
 
 	validate := validator.New()
 
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to update category", "error": "category not found"})
-	}
-
 	category, err := repo.GetCategory(param.ID)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -148,19 +144,15 @@ func DeleteCategory(c *fiber.Ctx) error {
 	err := c.ParamsParser(&param)
 
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "category not found"})
-	}
-
-	_, err = repo.GetCategory(param.ID)
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "Category not exist"})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": "category not exist"})
 	}
 
 	err = repo.DeleteCategory(param.ID)
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to delete category", "error": err})
+	if err.Error() == "Data not exist" {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to delete category", "error": err.Error()})
+	} else if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to delete category", "error": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{"message": "Category deleted successfully"})
