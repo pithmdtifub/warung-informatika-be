@@ -2,6 +2,7 @@ package repositories
 
 import (
 	db "warung-informatika-be/database"
+	"warung-informatika-be/helpers"
 	"warung-informatika-be/models"
 )
 
@@ -12,9 +13,9 @@ func GetCategories() ([]models.Category, error) {
 	return categories, err
 }
 
-func GetCategory(id int) (models.Category, error) {
-	category := models.Category{ID: uint(id)}
-	err := db.DB.First(&category).Error
+func GetCategory(id uint) (models.Category, error) {
+	var category models.Category
+	err := db.DB.First(&category, id).Error
 
 	return category, err
 }
@@ -24,12 +25,21 @@ func CreateCategory(category *models.Category) error {
 }
 
 func UpdateCategory(category *models.Category) error {
-	return db.DB.Save(category).Error
+	res := db.DB.Save(category)
+	if err := helpers.CheckRowsAffected(res.RowsAffected); err != nil {
+		return err
+	}
+
+	return res.Error
 }
 
-func DeleteCategory(id int) error {
-	category := models.Category{ID: uint(id)}
-	err := db.DB.Delete(&category).Error
+func DeleteCategory(id uint) error {
+	category := models.Category{ID: id}
+	res := db.DB.Delete(&category)
 
-	return err
+	if err := helpers.CheckRowsAffected(res.RowsAffected); err != nil {
+		return err
+	}
+
+	return res.Error
 }

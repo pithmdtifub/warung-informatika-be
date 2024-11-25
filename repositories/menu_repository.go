@@ -13,9 +13,9 @@ func GetMenus() ([]models.Menu, error) {
 	return menus, err
 }
 
-func GetMenu(id int) (models.Menu, error) {
-	var menu models.Menu
-	err := db.DB.Preload(clause.Associations).First(&menu, id).Error
+func GetMenu(id uint) (models.Menu, error) {
+	menu := models.Menu{ID: id}
+	err := db.DB.Preload(clause.Associations).First(&menu).Error
 
 	return menu, err
 }

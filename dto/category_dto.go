@@ -12,3 +12,7 @@ type CategoryResponse struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
+
+type CategoryParams struct {
+	ID uint `params:"id"`
+}
