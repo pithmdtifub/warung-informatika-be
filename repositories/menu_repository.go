@@ -2,34 +2,28 @@ package repositories
 
 import (
 	db "warung-informatika-be/database"
+	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
 
 	"gorm.io/gorm/clause"
 )
 
-func GetMenus(search string, category, page, limit int) ([]models.Menu, error) {
+func GetMenus(query dto.MenuQuery) ([]models.Menu, error) {
 	var menus []models.Menu
-	query := db.DB.Preload(clause.Associations)
+	queryDB := db.DB.Preload(clause.Associations)
 
-	if search != "" {
-		query = query.Where("name ILIKE ?", "%"+search+"%")
+	if query.Search != "" {
+		queryDB = queryDB.Where("name ILIKE ?", "%"+query.Search+"%")
 	}
 
-	if category != 0 {
-		query = query.Where("category_id = ?", category)
+	if query.Category != 0 {
+		queryDB = queryDB.Where("category_id = ?", query.Category)
 	}
 
-	if page < 1 {
-		page = 1
-	}
-	if limit <= 0 {
-		limit = 10
-	}
-	offset := (page - 1) * limit
+	offset := (query.Page - 1) * query.Limit
+	queryDB = queryDB.Limit(query.Limit).Offset(offset)
 
-	query = query.Limit(limit).Offset(offset)
-
-	err := query.Find(&menus).Error
+	err := queryDB.Find(&menus).Error
 
 	for i := range menus {
 		menus[i].CategoryName = menus[i].Category.Name
