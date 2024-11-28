@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"errors"
+	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
@@ -31,19 +33,54 @@ func GetMenus(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get all menus", "data": menus})
+	menusRes := make([]dto.MenuResponse, 0)
+
+	for _, menu := range menus {
+		menusRes = append(menusRes, dto.MenuResponse{
+			ID:           menu.ID,
+			Name:         menu.Name,
+			Description:  menu.Description,
+			Price:        menu.Price,
+			CategoryID:   menu.CategoryID,
+			CategoryName: menu.Category.Name,
+			Image:        menu.Image,
+		})
+	}
+
+	return c.JSON(fiber.Map{"message": "Successfully get all menu", "data": menusRes})
 }
 
 func GetMenu(c *fiber.Ctx) error {
-	id, _ := c.ParamsInt("id")
-
-	menu, err := repositories.GetMenu(id)
+	param := struct {
+		ID uint `params:"id"`
+	}{}
+	err := c.ParamsParser(&param)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Menu not found", "error": err.Error()})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Failed to get menu", "error": "menu not found"})
 	}
 
-	return c.JSON(fiber.Map{"message": "Successfully get menu", "menu": menu})
+	menu, err := repositories.GetMenu(param.ID)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Menu not found", "error": "menu not found"})
+	}
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menu", "error": err.Error()})
+	}
+
+	menuRes := dto.MenuResponse{
+		ID:           menu.ID,
+		Name:         menu.Name,
+		CategoryID:   menu.CategoryID,
+		CategoryName: menu.Category.Name,
+		Description:  menu.Description,
+		Price:        menu.Price,
+		Image:        menu.Image,
+	}
+
+	return c.JSON(fiber.Map{"message": "Successfully get menu", "data": menuRes})
 }
 
 func CreateMenu(c *fiber.Ctx) error {
@@ -75,7 +112,17 @@ func CreateMenu(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Menu created successfully", "data": menu})
+	menuRes := dto.MenuResponse{
+		ID:           menu.ID,
+		Name:         menu.Name,
+		Description:  menu.Description,
+		Price:        menu.Price,
+		CategoryID:   menu.CategoryID,
+		CategoryName: category.Name,
+		Image:        menu.Image,
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Menu created successfully", "data": menuRes})
 }
 
 func UpdateMenu(c *fiber.Ctx) error {

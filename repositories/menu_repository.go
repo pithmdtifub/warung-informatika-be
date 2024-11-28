@@ -25,18 +25,12 @@ func GetMenus(query dto.MenuQuery) ([]models.Menu, error) {
 
 	err := queryDB.Find(&menus).Error
 
-	for i := range menus {
-		menus[i].CategoryName = menus[i].Category.Name
-	}
-
 	return menus, err
 }
 
-func GetMenu(id int) (models.Menu, error) {
-	var menu models.Menu
-	err := db.DB.Preload(clause.Associations).First(&menu, id).Error
-
-	menu.CategoryName = menu.Category.Name
+func GetMenu(id uint) (models.Menu, error) {
+	menu := models.Menu{ID: id}
+	err := db.DB.Preload(clause.Associations).First(&menu).Error
 
 	return menu, err
 }

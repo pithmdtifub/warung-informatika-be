@@ -19,12 +19,10 @@ func RequireAuth(c *fiber.Ctx) error {
 	}
 
 	tokenArray := strings.Split(tokenString, " ")
-	if len(tokenArray) == 1 {
-		tokenString = tokenArray[0]
-	} else if len(tokenArray) == 2 {
+	if len(tokenArray) == 2 {
 		tokenString = tokenArray[1]
 	} else {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid token", "error": "invalid token"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Token not found", "error": "token not found"})
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -45,6 +43,9 @@ func RequireAuth(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token", "message": "Invalid token"})
 	}
 
+	claims := token.Claims.(jwt.MapClaims)
+
+	c.Locals("claims", claims)
 	err = c.Next()
 
 	return err

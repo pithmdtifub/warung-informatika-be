@@ -10,5 +10,11 @@ func CategoryRoutes(v fiber.Router) {
 	api := v.Group("/categories")
 
 	api.Get("/", c.GetCategories)
-	api.Post("/", m.RequireAuth, m.RequireAdmin, m.RequireJSONContent, c.CreateCategory)
+	api.Get("/:id", c.GetCategory)
+
+	api.Use(m.RequireAuth, m.RequireAdmin)
+
+	api.Post("/", m.RequireJSONContent, c.CreateCategory)
+	api.Put("/:id", m.RequireJSONContent, c.UpdateCategory)
+	api.Delete("/:id", c.DeleteCategory)
 }
