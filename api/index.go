@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"net/http"
-
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"net/http"
 
 	"warung-informatika-be/database"
 	"warung-informatika-be/routes"
@@ -21,9 +21,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // building the fiber application
 func handler() http.HandlerFunc {
 	database.ConnectDatabase()
-	//database.Migrate()
+
+	//database.MigrateDown()
+	//database.MigrateUp()
+	//seeders.Seed()
 
 	app := fiber.New()
+	app.Use(cors.New())
 	routes.Routes(app)
 
 	return adaptor.FiberApp(app)

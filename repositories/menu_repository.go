@@ -1,27 +1,37 @@
 package repositories
 
 import (
-	"gorm.io/gorm/clause"
 	db "warung-informatika-be/database"
+	"warung-informatika-be/dto"
+	"warung-informatika-be/helpers"
 	"warung-informatika-be/models"
+
+	"gorm.io/gorm/clause"
 )
 
-func GetMenus() ([]models.Menu, error) {
+func GetMenus(query dto.MenuQuery) ([]models.Menu, error) {
 	var menus []models.Menu
-	err := db.DB.Preload(clause.Associations).Find(&menus).Error
+	queryDB := db.DB.Preload(clause.Associations)
 
-	for i := range menus {
-		menus[i].CategoryName = menus[i].Category.Name
+	if query.Search != "" {
+		queryDB = queryDB.Where("name ILIKE ?", "%"+query.Search+"%")
 	}
+
+	if query.Category != 0 {
+		queryDB = queryDB.Where("category_id = ?", query.Category)
+	}
+
+	offset := (query.Page - 1) * query.Limit
+	queryDB = queryDB.Limit(query.Limit).Offset(offset)
+
+	err := queryDB.Find(&menus).Error
 
 	return menus, err
 }
 
-func GetMenu(id int) (models.Menu, error) {
-	var menu models.Menu
-	err := db.DB.Preload(clause.Associations).First(&menu, id).Error
-
-	menu.CategoryName = menu.Category.Name
+func GetMenu(id uint) (models.Menu, error) {
+	menu := models.Menu{ID: id}
+	err := db.DB.Preload(clause.Associations).First(&menu).Error
 
 	return menu, err
 }
@@ -31,10 +41,22 @@ func CreateMenu(menu *models.Menu) error {
 }
 
 func UpdateMenu(menu *models.Menu) error {
-	return db.DB.Save(menu).Error
+	res := db.DB.Save(menu)
+
+	if err := helpers.CheckRowsAffected(res.RowsAffected); err != nil {
+		return err
+	}
+
+	return res.Error
 }
 
 func DeleteMenu(id int) error {
 	var menu models.Menu
-	return db.DB.Delete(&menu, id).Error
+	res := db.DB.Delete(&menu, id)
+
+	if err := helpers.CheckRowsAffected(res.RowsAffected); err != nil {
+		return err
+	}
+
+	return res.Error
 }

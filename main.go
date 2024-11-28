@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"warung-informatika-be/database"
 	"warung-informatika-be/routes"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -16,9 +18,13 @@ func main() {
 	}
 
 	database.ConnectDatabase()
-	//database.Migrate()
+
+	//database.MigrateDown()
+	//database.MigrateUp()
+	//seeders.Seed()
 
 	app := fiber.New()
+	app.Use(cors.New())
 	routes.Routes(app)
 
 	port := os.Getenv("PORT")

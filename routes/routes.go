@@ -8,6 +8,10 @@ import (
 func Routes(app *fiber.App) {
 	app.Use(middlewares.Logger)
 
-	MenuRoutes(app)
-	CategoryRoutes(app)
+	api := app.Group("/api")
+	v1 := api.Group("/v1")
+
+	AuthRoutes(v1)
+	MenuRoutes(v1)
+	CategoryRoutes(v1)
 }
