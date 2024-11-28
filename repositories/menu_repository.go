@@ -3,6 +3,7 @@ package repositories
 import (
 	db "warung-informatika-be/database"
 	"warung-informatika-be/dto"
+	"warung-informatika-be/helpers"
 	"warung-informatika-be/models"
 
 	"gorm.io/gorm/clause"
@@ -40,10 +41,22 @@ func CreateMenu(menu *models.Menu) error {
 }
 
 func UpdateMenu(menu *models.Menu) error {
-	return db.DB.Save(menu).Error
+	res := db.DB.Save(menu)
+
+	if err := helpers.CheckRowsAffected(res.RowsAffected); err != nil {
+		return err
+	}
+
+	return res.Error
 }
 
 func DeleteMenu(id int) error {
 	var menu models.Menu
-	return db.DB.Delete(&menu, id).Error
+	res := db.DB.Delete(&menu, id)
+
+	if err := helpers.CheckRowsAffected(res.RowsAffected); err != nil {
+		return err
+	}
+
+	return res.Error
 }
