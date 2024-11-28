@@ -1,11 +1,12 @@
 package models
 
 type Menu struct {
-	ID          uint   `gorm:"primaryKey"`
-	Name        string `gorm:"not null"`
-	CategoryID  uint   `gorm:"not null"`
-	Category    Category
-	Description string  `gorm:"not null"`
-	Price       float64 `gorm:"not null"`
-	Image       string  `gorm:"not null"`
+	ID           uint     `json:"id" gorm:"primaryKey"`
+	Name         string   `json:"name" gorm:"column:name"`
+	CategoryID   uint     `json:"category_id" gorm:"column:category_id"`
+	Category     Category `json:"-"`
+	CategoryName string   `json:"category" gorm:"->"`
+	Description  string   `json:"description" gorm:"column:description"`
+	Price        float64  `json:"price" gorm:"column:price"`
+	Image        string   `json:"image" gorm:"column:image"`
 }

@@ -2,17 +2,32 @@ package controllers
 
 import (
 	"errors"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 	"strings"
 	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
 	"warung-informatika-be/repositories"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetMenus(c *fiber.Ctx) error {
-	menus, err := repositories.GetMenus()
+	var queryParams dto.MenuQuery
+	if err := c.QueryParser(&queryParams); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid query parameters",
+			"error":   err.Error(),
+		})
+	}
+
+	if queryParams.Page < 1 {
+		queryParams.Page = 1
+	}
+	if queryParams.Limit < 1 {
+		queryParams.Limit = 10
+	}
+
+	menus, err := repositories.GetMenus(queryParams)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get menus", "error": err.Error()})
@@ -69,42 +84,28 @@ func GetMenu(c *fiber.Ctx) error {
 }
 
 func CreateMenu(c *fiber.Ctx) error {
+	var menuDTO dto.MenuDTO
+
+	if err := c.BodyParser(&menuDTO); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err.Error()})
+	}
+
 	validate := validator.New()
-
-	menuReq := new(dto.MenuRequest)
-
-	err := c.BodyParser(&menuReq)
-
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err})
-	}
-
-	if err = validate.Struct(menuReq); err != nil {
-		_errors := make(map[string]string)
+	if err := validate.Struct(menuDTO); err != nil {
+		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
-			field := strings.ToLower(err.Field())
-			_errors[field] = "Error on " + field + ": " + err.Tag()
+			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
 		}
-
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": _errors})
-	}
-
-	category, err := repositories.GetCategory(menuReq.CategoryID)
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Failed to create menu", "error": "category not found"})
-	}
-
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to create menu", "error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
 	}
 
 	menu := models.Menu{
-		Name:        menuReq.Name,
-		Description: menuReq.Description,
-		Price:       menuReq.Price,
-		CategoryID:  menuReq.CategoryID,
-		Image:       menuReq.Image,
+		Name:        menuDTO.Name,
+		CategoryID:  menuDTO.CategoryID,
+		CategoryName: menuDTO.CategoryName,
+		Description: menuDTO.Description,
+		Price:       menuDTO.Price,
+		Image:       menuDTO.Image,
 	}
 
 	if err := repositories.CreateMenu(&menu); err != nil {
@@ -125,9 +126,56 @@ func CreateMenu(c *fiber.Ctx) error {
 }
 
 func UpdateMenu(c *fiber.Ctx) error {
-	return c.Next()
+	var params dto.MenuParams
+	if err := c.ParamsParser(&params); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid menu ID", "error": err.Error()})
+	}
+
+	var menuDTO dto.MenuDTO
+	if err := c.BodyParser(&menuDTO); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Cannot parse JSON", "error": err.Error()})
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(menuDTO); err != nil {
+		errors := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errors[err.Field()] = "Error on " + err.Field() + ": " + err.Tag()
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Validation failed", "errors": errors})
+	}
+
+	menu := models.Menu{
+		ID:          params.ID,
+		Name:        menuDTO.Name,
+		CategoryID:  menuDTO.CategoryID,
+		CategoryName: menuDTO.CategoryName,
+		Description: menuDTO.Description,
+		Price:       menuDTO.Price,
+		Image:       menuDTO.Image,
+	}
+
+	if err := repositories.UpdateMenu(&menu); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to update menu", "error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"message": "Menu updated successfully", "data": menu})
 }
 
 func DeleteMenu(c *fiber.Ctx) error {
-	return c.Next()
+	var params dto.MenuParams
+	if err := c.ParamsParser(&params); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid menu ID", "error": err.Error()})
+    }
+
+    _, err := repositories.GetMenu(int(params.ID))
+    if err != nil {
+        return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"message": "Menu not found", "error": err.Error()})
+    }
+
+    if err := repositories.DeleteMenu(int(params.ID)); err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to delete menu", "error": err.Error()})
+    }
+
+    return c.JSON(fiber.Map{"message": "Menu deleted successfully"})
 }

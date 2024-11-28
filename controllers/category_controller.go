@@ -15,7 +15,7 @@ func GetCategories(c *fiber.Ctx) error {
 	categories, err := repo.GetCategories()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all category", "error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Failed to get all categories", "error": err.Error()})
 	}
 
 	categoriesRes := make([]dto.CategoryResponse, 0)

@@ -1,14 +1,29 @@
 package repositories
 
 import (
-	"gorm.io/gorm/clause"
 	db "warung-informatika-be/database"
+	"warung-informatika-be/dto"
 	"warung-informatika-be/models"
+
+	"gorm.io/gorm/clause"
 )
 
-func GetMenus() ([]models.Menu, error) {
+func GetMenus(query dto.MenuQuery) ([]models.Menu, error) {
 	var menus []models.Menu
-	err := db.DB.Preload(clause.Associations).Find(&menus).Error
+	queryDB := db.DB.Preload(clause.Associations)
+
+	if query.Search != "" {
+		queryDB = queryDB.Where("name ILIKE ?", "%"+query.Search+"%")
+	}
+
+	if query.Category != 0 {
+		queryDB = queryDB.Where("category_id = ?", query.Category)
+	}
+
+	offset := (query.Page - 1) * query.Limit
+	queryDB = queryDB.Limit(query.Limit).Offset(offset)
+
+	err := queryDB.Find(&menus).Error
 
 	return menus, err
 }
